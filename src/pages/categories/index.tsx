@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { type Category } from "@/data/mock";
 import { categoryFormSchema, type CategoryFormSchema } from "@/forms/category";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ReactElement } from "react";
@@ -96,9 +95,9 @@ const CategoriesPage: NextPageWithLayout = () => {
     });
   };
 
-  const handleClickEditCategory = (category: Category) => {
+  const handleClickEditCategory = (categoryId: string) => {
     setEditCategoryDialogOpen(true);
-    setCategoryToEdit(category.id);
+    setCategoryToEdit(categoryId);
   };
 
   const handleClickDeleteCategory = (categoryId: string) => {
@@ -162,8 +161,8 @@ const CategoriesPage: NextPageWithLayout = () => {
               key={category.id}
               name={category.name}
               productCount={category.productCount}
+              onEdit={() => handleClickEditCategory(category.id)}
               onDelete={() => handleClickDeleteCategory(category.id)}
-              onEdit={() => handleClickEditCategory(category)}
             />
           );
         })}
