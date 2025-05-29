@@ -15,47 +15,47 @@ const SalesPage: NextPageWithLayout = () => {
       id: "ORD-001",
       totalAmount: 45.99,
       totalItems: 3,
-      status: "Processing"
+      status: "Processing",
     },
     {
       id: "ORD-002",
-      totalAmount: 23.50,
+      totalAmount: 23.5,
       totalItems: 2,
-      status: "Finished"
+      status: "Finished",
     },
     {
       id: "ORD-003",
       totalAmount: 67.25,
       totalItems: 5,
-      status: "Processing"
+      status: "Processing",
     },
     {
       id: "ORD-004",
       totalAmount: 12.99,
       totalItems: 1,
-      status: "Finished"
+      status: "Finished",
     },
     {
       id: "ORD-005",
       totalAmount: 89.75,
       totalItems: 7,
-      status: "Processing"
+      status: "Processing",
     },
     {
       id: "ORD-006",
-      totalAmount: 34.20,
+      totalAmount: 34.2,
       totalItems: 4,
-      status: "Finished"
-    }
+      status: "Finished",
+    },
   ]);
 
   const handleFinishOrder = (orderId: string) => {
-    setOrders(prevOrders =>
-      prevOrders.map(order =>
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
         order.id === orderId
           ? { ...order, status: "Finished" as const }
-          : order
-      )
+          : order,
+      ),
     );
   };
 
@@ -68,7 +68,7 @@ const SalesPage: NextPageWithLayout = () => {
         </DashboardDescription>
       </DashboardHeader>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+      <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-lg border p-4 shadow-sm">
           <h3 className="text-lg font-medium">Total Revenue</h3>
           <p className="mt-2 text-3xl font-bold">$0.00</p>
@@ -86,8 +86,8 @@ const SalesPage: NextPageWithLayout = () => {
       </div>
 
       <div className="rounded-lg border p-6">
-        <h3 className="text-lg font-medium mb-4">Orders</h3>
-        
+        <h3 className="mb-4 text-lg font-medium">Orders</h3>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {orders.map((order) => (
             <OrderCard
@@ -106,4 +106,4 @@ SalesPage.getLayout = (page: ReactElement) => {
   return <DashboardLayout>{page}</DashboardLayout>;
 };
 
-export default SalesPage; 
+export default SalesPage;

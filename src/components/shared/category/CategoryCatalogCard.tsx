@@ -37,10 +37,20 @@ export const CategoryCatalogCard: React.FC<CategoryCatalogCardProps> = ({
       </CardContent>
 
       <CardFooter className="flex items-center justify-center gap-2">
-        <Button className="flex-1" variant="outline" size="icon" onClick={onEdit}>
+        <Button
+          className="flex-1"
+          variant="outline"
+          size="icon"
+          onClick={onEdit}
+        >
           <Pencil />
         </Button>
-        <Button className="flex-1" variant="destructive" size="icon" onClick={onDelete}>
+        <Button
+          className="flex-1"
+          variant="destructive"
+          size="icon"
+          onClick={onDelete}
+        >
           <Trash />
         </Button>
       </CardFooter>

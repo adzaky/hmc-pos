@@ -25,7 +25,7 @@ export const ProductMenuCard: React.FC<ProductMenuCardProps> = ({
   return (
     <div className="hover:bg-accent/10 relative flex flex-col rounded-lg border p-4 transition-colors">
       {product.image && (
-        <div className="mb-3 h-32 w-full overflow-hidden rounded-md relative">
+        <div className="relative mb-3 h-32 w-full overflow-hidden rounded-md">
           <Image
             unoptimized
             fill

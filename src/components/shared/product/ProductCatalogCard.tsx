@@ -26,7 +26,7 @@ export const ProductCatalogCard: React.FC<ProductCatalogCardProps> = ({
   className,
 }) => {
   return (
-    <Card className={cn("pt-0 overflow-hidden", className)}>
+    <Card className={cn("overflow-hidden pt-0", className)}>
       <div className="relative h-48 w-full overflow-hidden">
         {image ? (
           <Image
