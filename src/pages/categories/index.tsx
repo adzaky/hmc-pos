@@ -48,17 +48,18 @@ const CategoriesPage: NextPageWithLayout = () => {
   // Queries ===================================================================
   const { data: categories } = api.category.getCategories.useQuery();
 
-  const { mutate: createCategory } = api.category.createCategory.useMutation({
-    onSuccess: async () => {
-      await apiUtils.category.getCategories.invalidate();
+  const { mutate: createCategory, isPending: isPendingCreateCategory } =
+    api.category.createCategory.useMutation({
+      onSuccess: async () => {
+        await apiUtils.category.getCategories.invalidate();
 
-      alert("Category created successfully!");
-      setCreateCategoryDialogOpen(false);
-      createCategoryForm.reset();
-    },
-  });
+        alert("Category created successfully!");
+        setCreateCategoryDialogOpen(false);
+        createCategoryForm.reset();
+      },
+    });
 
-  const { mutate: deleteCategoryById } =
+  const { mutate: deleteCategoryById, isPending: isPendingDeleteCategory } =
     api.category.deleteCategory.useMutation({
       onSuccess: async () => {
         await apiUtils.category.getCategories.invalidate();
@@ -68,15 +69,16 @@ const CategoriesPage: NextPageWithLayout = () => {
       },
     });
 
-  const { mutate: editCategory } = api.category.editCategory.useMutation({
-    onSuccess: async () => {
-      await apiUtils.category.getCategories.invalidate();
+  const { mutate: editCategory, isPending: isPendingEditCategory } =
+    api.category.editCategory.useMutation({
+      onSuccess: async () => {
+        await apiUtils.category.getCategories.invalidate();
 
-      alert("Category edited successfully!");
-      setEditCategoryDialogOpen(false);
-      editCategoryForm.reset();
-    },
-  });
+        alert("Category edited successfully!");
+        setEditCategoryDialogOpen(false);
+        editCategoryForm.reset();
+      },
+    });
 
   // Handlers ===================================================================
   const handleSubmitCreateCategory = (data: CategoryFormSchema) => {
@@ -132,18 +134,18 @@ const CategoriesPage: NextPageWithLayout = () => {
                 <AlertDialogTitle>Add New Category</AlertDialogTitle>
               </AlertDialogHeader>
               <Form {...createCategoryForm}>
-                <CategoryForm
-                  onSubmit={handleSubmitCreateCategory}
-                  submitText="Create Category"
-                />
+                <CategoryForm onSubmit={handleSubmitCreateCategory} />
               </Form>
 
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel onClick={() => createCategoryForm.reset()}>
+                  Cancel
+                </AlertDialogCancel>
                 <Button
                   onClick={createCategoryForm.handleSubmit(
                     handleSubmitCreateCategory,
                   )}
+                  loading={isPendingCreateCategory}
                 >
                   Create Category
                 </Button>
@@ -176,16 +178,16 @@ const CategoriesPage: NextPageWithLayout = () => {
             <AlertDialogTitle>Edit Category</AlertDialogTitle>
           </AlertDialogHeader>
           <Form {...editCategoryForm}>
-            <CategoryForm
-              onSubmit={handleSubmitEditCategory}
-              submitText="Edit Category"
-            />
+            <CategoryForm onSubmit={handleSubmitEditCategory} />
           </Form>
 
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => editCategoryForm.reset()}>
+              Cancel
+            </AlertDialogCancel>
             <Button
               onClick={editCategoryForm.handleSubmit(handleSubmitEditCategory)}
+              loading={isPendingEditCategory}
             >
               Edit Category
             </Button>
@@ -211,7 +213,11 @@ const CategoriesPage: NextPageWithLayout = () => {
           </AlertDialogDescription>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button variant="destructive" onClick={handleConfirmDeleteCategory}>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDeleteCategory}
+              loading={isPendingDeleteCategory}
+            >
               Delete
             </Button>
           </AlertDialogFooter>

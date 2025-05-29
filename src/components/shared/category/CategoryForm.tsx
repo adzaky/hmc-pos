@@ -11,10 +11,9 @@ import { useFormContext } from "react-hook-form";
 
 interface CategoryFormProps {
   onSubmit: (data: CategoryFormSchema) => void;
-  submitText: string;
 }
 
-export const CategoryForm = ({ onSubmit, submitText }: CategoryFormProps) => {
+export const CategoryForm = ({ onSubmit }: CategoryFormProps) => {
   const form = useFormContext<CategoryFormSchema>();
 
   return (
