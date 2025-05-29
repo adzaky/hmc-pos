@@ -14,6 +14,22 @@ model Category {
     name String
     productCount Int @default(0)
 
+    product Product[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Product {
+    id String @id @default(uuid())
+
+    name String
+    price Int
+    imageUrl String?
+    categoryId String
+
+    category Category @relation(fields: [categoryId], references: [id])
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
