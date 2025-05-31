@@ -15,6 +15,14 @@ type XenditWebhookBody = {
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== "POST") return;
 
+  const headers = req.headers;
+
+  const webhookToken = headers["x-callback-token"];
+
+  if (webhookToken !== process.env.XENDIT_WEBHOOK_TOKEN) {
+    return res.status(401).send("Unauthorized");
+  }
+
   const body = req.body as XenditWebhookBody;
 
   const order = await db.order.findUnique({

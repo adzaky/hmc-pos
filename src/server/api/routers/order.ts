@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { createQRIS } from "@/server/xendit";
+import { createQRIS, xenditPaymentMethodClient } from "@/server/xendit";
+import { TRPCError } from "@trpc/server";
 
 export const orderRouter = createTRPCRouter({
   createOrder: protectedProcedure
@@ -68,7 +69,7 @@ export const orderRouter = createTRPCRouter({
         amount: grandTotal,
         orderId: order.id,
       });
-      
+
       await db.order.update({
         where: {
           id: order.id,
@@ -85,5 +86,66 @@ export const orderRouter = createTRPCRouter({
         qrString:
           paymentRequest.paymentMethod.qrCode?.channelProperties?.qrString,
       };
+    }),
+
+  simulatePayment: protectedProcedure
+    .input(
+      z.object({
+        orderId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx;
+
+      const order = await db.order.findUnique({
+        where: {
+          id: input.orderId,
+        },
+        select: {
+          paymentMethodId: true,
+          grandTotal: true,
+          externalTransactionId: true,
+        },
+      });
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Order not found",
+        });
+      }
+
+      await xenditPaymentMethodClient.simulatePayment({
+        paymentMethodId: order.paymentMethodId!,
+        data: {
+          amount: order.grandTotal,
+        },
+      });
+    }),
+
+  checkOrderStatus: protectedProcedure
+    .input(
+      z.object({
+        orderId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx;
+
+      const order = await db.order.findUnique({
+        where: {
+          id: input.orderId,
+        },
+        select: {
+          paidAt: true,
+          status: true,
+        },
+      });
+
+      if (!order?.paidAt) {
+        return false;
+      }
+
+      return true;
     }),
 });

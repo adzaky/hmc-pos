@@ -1,13 +1,10 @@
 import { Button } from "../ui/button";
-
-import { PRODUCTS } from "@/data/mock";
 import { toRupiah } from "@/utils/toRupiah";
 import { CheckCircle2, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import {
   AlertDialog,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogFooter,
 } from "../ui/alert-dialog";
@@ -100,7 +97,6 @@ export const CreateOrderSheet = ({
 
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [paymentInfoLoading, setPaymentInfoLoading] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   const subtotal = cartStore.items.reduce((a, b) => {
     return a + b.price * b.quantity;
@@ -137,8 +133,46 @@ export const CreateOrderSheet = ({
     });
   };
 
+  const { mutate: simulatePayment } = api.order.simulatePayment.useMutation({
+    onSuccess: () => {
+      alert("Payment simulated successfully");
+    },
+  });
+
+  const {
+    mutate: checkOrderStatus,
+    data: orderPaid,
+    isPending: isPendingOrderStatus,
+    reset: resetCheckOrderStatus,
+  } = api.order.checkOrderStatus.useMutation({
+    onSuccess: (orderPaid) => {
+      if (orderPaid) {
+        cartStore.clearCart();
+        return;
+      }
+    },
+  });
+
   const handleRefresh = () => {
-    setPaymentSuccess(true);
+    if (!createdOrder) return;
+
+    checkOrderStatus({
+      orderId: createdOrder?.order.id,
+    });
+  };
+
+  const handleSimulatePayment = () => {
+    if (!createdOrder) return;
+
+    simulatePayment({
+      orderId: createdOrder?.order.id,
+    });
+  };
+
+  const handleClosePaymentDialog = () => {
+    setPaymentDialogOpen(false);
+    onOpenChange(false);
+    resetCheckOrderStatus();
   };
 
   return (
@@ -213,11 +247,17 @@ export const CreateOrderSheet = ({
               </div>
             ) : (
               <>
-                <Button variant="link" onClick={handleRefresh}>
-                  Refresh
-                </Button>
+                {!orderPaid && (
+                  <Button
+                    variant="link"
+                    onClick={handleRefresh}
+                    loading={isPendingOrderStatus}
+                  >
+                    {isPendingOrderStatus ? "Refreshing..." : "Refresh"}
+                  </Button>
+                )}
 
-                {!paymentSuccess ? (
+                {!orderPaid ? (
                   <PaymentQRCode qrString={createdOrder?.qrString ?? ""} />
                 ) : (
                   <CheckCircle2 className="size-80 text-green-500" />
@@ -230,20 +270,25 @@ export const CreateOrderSheet = ({
                 <p className="text-muted-foreground text-sm">
                   Transaction ID: {createdOrder?.order?.id}
                 </p>
+
+                {!orderPaid && (
+                  <Button variant="link" onClick={handleSimulatePayment}>
+                    Simulate Payment
+                  </Button>
+                )}
               </>
             )}
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel asChild>
-              <Button
-                disabled={paymentInfoLoading}
-                variant="outline"
-                className="w-full"
-              >
-                Done
-              </Button>
-            </AlertDialogCancel>
+            <Button
+              disabled={paymentInfoLoading}
+              variant="outline"
+              className="w-full"
+              onClick={handleClosePaymentDialog}
+            >
+              Done
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
