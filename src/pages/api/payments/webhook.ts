@@ -15,8 +15,6 @@ type XenditWebhookBody = {
 const handler: NextApiHandler = async (req, res) => {
   if (req.method !== "POST") return;
 
-  console.log(JSON.stringify(req.body, null, 2));
-
   const body = req.body as XenditWebhookBody;
 
   const order = await db.order.findUnique({
