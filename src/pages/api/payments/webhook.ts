@@ -43,7 +43,7 @@ const handler: NextApiHandler = async (req, res) => {
     },
   });
 
-  res.status(200);
+  return res.status(200);
 };
 
 export default handler;
