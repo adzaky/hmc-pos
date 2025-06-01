@@ -97,7 +97,6 @@ export const CreateOrderSheet = ({
   const cartStore = useCartStore();
 
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
-  const [paymentInfoLoading, setPaymentInfoLoading] = useState(false);
 
   const subtotal = cartStore.items.reduce((a, b) => {
     return a + b.price * b.quantity;
@@ -240,53 +239,43 @@ export const CreateOrderSheet = ({
           <div className="flex flex-col items-center justify-center gap-4">
             <p className="text-lg font-medium">Finish Payment</p>
 
-            {paymentInfoLoading ? (
-              <div className="flex flex-col items-center justify-center gap-2">
-                <div className="border-primary h-10 w-10 animate-spin rounded-full border-t-2 border-b-2 border-l-2" />
+            {!orderPaid && (
+              <Button
+                variant="link"
+                onClick={handleRefresh}
+                loading={isPendingOrderStatus}
+              >
+                {isPendingOrderStatus ? "Refreshing..." : "Refresh"}
+              </Button>
+            )}
 
-                <p>Loading...</p>
-              </div>
+            {!orderPaid ? (
+              <PaymentQRCode qrString={createdOrder?.qrString ?? ""} />
             ) : (
-              <>
-                {!orderPaid && (
-                  <Button
-                    variant="link"
-                    onClick={handleRefresh}
-                    loading={isPendingOrderStatus}
-                  >
-                    {isPendingOrderStatus ? "Refreshing..." : "Refresh"}
-                  </Button>
-                )}
+              <CheckCircle2 className="size-80 text-green-500" />
+            )}
 
-                {!orderPaid ? (
-                  <PaymentQRCode qrString={createdOrder?.qrString ?? ""} />
-                ) : (
-                  <CheckCircle2 className="size-80 text-green-500" />
-                )}
+            <p className="text-3xl font-medium">
+              {toRupiah(createdOrder?.order?.grandTotal ?? 0)}
+            </p>
 
-                <p className="text-3xl font-medium">
-                  {toRupiah(createdOrder?.order?.grandTotal ?? 0)}
-                </p>
+            <p className="text-muted-foreground text-sm">
+              Transaction ID: {createdOrder?.order?.id}
+            </p>
 
-                <p className="text-muted-foreground text-sm">
-                  Transaction ID: {createdOrder?.order?.id}
-                </p>
-
-                {!orderPaid && (
-                  <Button variant="link" onClick={handleSimulatePayment}>
-                    Simulate Payment
-                  </Button>
-                )}
-              </>
+            {!orderPaid && (
+              <Button variant="link" onClick={handleSimulatePayment}>
+                Simulate Payment
+              </Button>
             )}
           </div>
 
           <AlertDialogFooter>
             <Button
-              disabled={paymentInfoLoading}
               variant="outline"
               className="w-full"
               onClick={handleClosePaymentDialog}
+              loading={isPendingOrderStatus}
             >
               Done
             </Button>

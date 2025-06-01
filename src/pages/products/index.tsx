@@ -5,7 +5,7 @@ import {
   DashboardTitle,
 } from "@/components/layouts/DashboardLayout";
 import type { NextPageWithLayout } from "../_app";
-import { useEffect, useState, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { Button } from "@/components/ui/button";
 import { ProductCatalogCard } from "@/components/shared/product/ProductCatalogCard";
 import { api } from "@/utils/api";

@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Image from "next/image";
-import { type Product } from "@/data/mock/products";
 import { toRupiah } from "@/utils/toRupiah";
 
 interface ProductMenuCardProps {
@@ -44,7 +43,6 @@ export const ProductMenuCard: React.FC<ProductMenuCardProps> = ({
 
         <Button
           size="icon"
-          // variant="secondary"
           onClick={() => onAddToCart(productId)}
           aria-label={`Add ${name} to cart`}
         >

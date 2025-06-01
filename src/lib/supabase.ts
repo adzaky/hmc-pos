@@ -19,17 +19,16 @@ export async function uploadFileToSignedUrl({
   bucket: Bucket;
 }) {
   try {
-    const { data, error } = await supabaseClient.storage
+    const result = await supabaseClient.storage
       .from(bucket)
       .uploadToSignedUrl(path, token, file);
 
-    if (error) throw error;
-
-    if (!data) throw new Error("No data");
+    if (result.error) throw result.error;
+    if (!result.data) throw new Error("No data");
 
     const fileurl = supabaseClient.storage
       .from(bucket)
-      .getPublicUrl(data?.path);
+      .getPublicUrl(result.data.path);
 
     return fileurl.data.publicUrl;
   } catch (error) {

@@ -6,7 +6,7 @@ import {
 } from "@/components/layouts/DashboardLayout";
 import { OrderCard } from "@/components/OrderCard";
 import type { NextPageWithLayout } from "../_app";
-import { use, useState, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { api } from "@/utils/api";
 import {
   Select,

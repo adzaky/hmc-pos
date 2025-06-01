@@ -149,7 +149,7 @@ export const ProductForm = ({
               href={form.getValues("imageUrl")}
               className="text-muted-foreground ml-2 text-sm hover:underline"
             >
-              {form.getValues("imageUrl").split("/").pop() || "No image"}
+              {form.getValues("imageUrl").split("/").pop() ?? "No image"}
             </Link>
           </div>
         )}

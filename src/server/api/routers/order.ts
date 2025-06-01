@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { createQRIS, xenditPaymentMethodClient } from "@/server/xendit";
 import { TRPCError } from "@trpc/server";
-import { OrderStatus, Prisma } from "@prisma/client";
+import { OrderStatus, type Prisma } from "@prisma/client";
 
 export const orderRouter = createTRPCRouter({
   createOrder: protectedProcedure
@@ -241,7 +241,7 @@ export const orderRouter = createTRPCRouter({
       });
     }),
 
-  getSalesReport: protectedProcedure.query(async ({ ctx, input }) => {
+  getSalesReport: protectedProcedure.query(async ({ ctx }) => {
     const { db } = ctx;
 
     const paidOrdersQuery = db.order.findMany({
