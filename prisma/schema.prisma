@@ -14,7 +14,7 @@ model Category {
     name String
     productCount Int @default(0)
 
-    product Product[]
+    products Product[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
