@@ -1,6 +1,7 @@
 import { BarChart3, Grid3X3, Package, ShoppingCart } from "lucide-react";
 import React, { type ReactNode } from "react";
 
+import { SignOutButton } from "@clerk/nextjs";
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { Button } from "../ui/button";
 
 // Dashboard header component
 interface DashboardHeaderProps {
@@ -64,6 +66,9 @@ interface DashboardLayoutProps {
 }
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  const [isPendingSignOut, setIsPendingSignOut] =
+    React.useState<boolean>(false);
+
   const router = useRouter();
 
   return (
@@ -134,6 +139,16 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </SidebarContent>
           <SidebarFooter className="p-4">
             <p className="text-muted-foreground text-xs">Hammercode POS v1.0</p>
+            <SignOutButton redirectUrl="/sign-in">
+              <Button
+                variant="destructive"
+                className="hover:opacity-80"
+                onClick={() => setIsPendingSignOut(true)}
+                loading={isPendingSignOut}
+              >
+                Sign Out
+              </Button>
+            </SignOutButton>
           </SidebarFooter>
         </Sidebar>
 
