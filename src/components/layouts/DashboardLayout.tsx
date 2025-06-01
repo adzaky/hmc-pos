@@ -1,4 +1,4 @@
-import { BarChart3, Grid3X3, Package, ShoppingCart, Sun } from "lucide-react";
+import { BarChart3, Grid3X3, Package, ShoppingCart } from "lucide-react";
 import React, { type ReactNode } from "react";
 
 import {
@@ -14,8 +14,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { useTheme } from "next-themes";
-import { Button } from "../ui/button";
 
 // Dashboard header component
 interface DashboardHeaderProps {
@@ -67,12 +65,6 @@ interface DashboardLayoutProps {
 
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const router = useRouter();
-
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -142,11 +134,6 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </SidebarContent>
           <SidebarFooter className="p-4">
             <p className="text-muted-foreground text-xs">Simple POS v1.0</p>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" onClick={toggleTheme}>
-                {theme === "dark" ? "Dark Mode" : "Light Mode"}
-              </Button>
-            </div>
           </SidebarFooter>
         </Sidebar>
 
