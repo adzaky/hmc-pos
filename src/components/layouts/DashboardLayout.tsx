@@ -71,7 +71,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <div className="flex h-screen w-full">
         <Sidebar>
           <SidebarHeader className="p-4">
-            <h2 className="text-xl font-bold">Simple POS</h2>
+            <h2 className="text-xl font-bold">Hammercode POS</h2>
           </SidebarHeader>
           <SidebarContent className="px-4">
             <SidebarMenu>
@@ -133,7 +133,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter className="p-4">
-            <p className="text-muted-foreground text-xs">Simple POS v1.0</p>
+            <p className="text-muted-foreground text-xs">Hammercode POS v1.0</p>
           </SidebarFooter>
         </Sidebar>
 

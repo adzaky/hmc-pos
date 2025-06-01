@@ -66,7 +66,7 @@ const DashboardPage: NextPageWithLayout = () => {
           <div className="space-y-1">
             <DashboardTitle>Dashboard {cartStore.items.length}</DashboardTitle>
             <DashboardDescription>
-              Welcome to your Simple POS system dashboard.
+              Welcome to your Hammercode POS system dashboard.
             </DashboardDescription>
           </div>
 
