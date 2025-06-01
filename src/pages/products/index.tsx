@@ -5,10 +5,8 @@ import {
   DashboardTitle,
 } from "@/components/layouts/DashboardLayout";
 import type { NextPageWithLayout } from "../_app";
-import { useState, type ReactElement } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 import { Button } from "@/components/ui/button";
-import { PRODUCTS } from "@/data/mock";
-import { ProductMenuCard } from "@/components/shared/product/ProductMenuCard";
 import { ProductCatalogCard } from "@/components/shared/product/ProductCatalogCard";
 import { api } from "@/utils/api";
 import {
@@ -26,15 +24,28 @@ import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { productFormSchema, type ProductFormSchema } from "@/forms/product";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Product } from "@prisma/client";
 
 const ProductsPage: NextPageWithLayout = () => {
   const apiUtils = api.useUtils();
 
+  const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [createProductDialogOpen, setCreateProductDialogOpen] = useState(false);
   const [editProductDialogOpen, setEditProductDialogOpen] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
-  const [productToEdit, setProductToEdit] = useState<string | null>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [productToEdit, setProductToEdit] = useState<Omit<
+    Product,
+    "createdAt" | "updatedAt"
+  > | null>(null);
 
   const createProductForm = useForm<ProductFormSchema>({
     resolver: zodResolver(productFormSchema),
@@ -42,16 +53,26 @@ const ProductsPage: NextPageWithLayout = () => {
 
   const editProductForm = useForm<ProductFormSchema>({
     resolver: zodResolver(productFormSchema),
+    values: {
+      name: productToEdit?.name ?? "",
+      price: productToEdit?.price ?? 0,
+      categoryId: productToEdit?.categoryId ?? "",
+      imageUrl: productToEdit?.imageUrl ?? "",
+    },
   });
 
-  const { data: product } = api.product.getProducts.useQuery();
+  const { data: product } = api.product.getProducts.useQuery({
+    categoryId: selectedCategory,
+  });
+
+  const { data: categories } = api.category.getCategories.useQuery();
 
   const { mutate: createProduct, isPending: isCreateProductPending } =
     api.product.createProduct.useMutation({
       onSuccess: async () => {
         await apiUtils.product.getProducts.invalidate();
 
-        alert("Product created successfully!");
+        toast("Product created successfully!");
         setCreateProductDialogOpen(false);
         setUploadedImageUrl(null);
         createProductForm.reset();
@@ -63,7 +84,7 @@ const ProductsPage: NextPageWithLayout = () => {
       onSuccess: async () => {
         await apiUtils.product.getProducts.invalidate();
 
-        alert("Product deleted successfully!");
+        toast("Product deleted successfully!");
         setProductToDelete(null);
       },
     });
@@ -73,15 +94,19 @@ const ProductsPage: NextPageWithLayout = () => {
       onSuccess: async () => {
         await apiUtils.product.getProducts.invalidate();
 
-        alert("Product edited successfully!");
+        toast("Product edited successfully!");
         setEditProductDialogOpen(false);
         editProductForm.reset();
       },
     });
 
+  const handleCategoryClick = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+  };
+
   const handleSubmitCreateProduct = (values: ProductFormSchema) => {
     if (!uploadedImageUrl) {
-      alert("Upload product image first!");
+      toast("Upload product image first!");
       return;
     }
 
@@ -95,20 +120,22 @@ const ProductsPage: NextPageWithLayout = () => {
     if (!productToEdit) return;
 
     if (!uploadedImageUrl) {
-      alert("Upload product image first!");
+      toast("Upload product image first!");
       return;
     }
 
     editProduct({
       ...data,
-      productId: productToEdit,
+      productId: productToEdit.id,
       imageUrl: uploadedImageUrl,
     });
   };
 
-  const handleClickEditProduct = (productId: string) => {
+  const handleClickEditProduct = (
+    product: Omit<Product, "createdAt" | "updatedAt">,
+  ) => {
+    setProductToEdit(product);
     setEditProductDialogOpen(true);
-    setProductToEdit(productId);
   };
 
   const handleClickDeleteProduct = (productId: string) => {
@@ -136,7 +163,24 @@ const ProductsPage: NextPageWithLayout = () => {
             onOpenChange={setCreateProductDialogOpen}
           >
             <AlertDialogTrigger asChild>
-              <Button>Add New Product</Button>
+              <div className="flex items-center gap-2">
+                <Select defaultValue="ALL" onValueChange={handleCategoryClick}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent align="end">
+                    <SelectItem value="ALL">ALL CATEGORY</SelectItem>
+                    {categories?.map((category) => {
+                      return (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                <Button>Add New Product</Button>
+              </div>
             </AlertDialogTrigger>
 
             <AlertDialogContent>
@@ -175,7 +219,15 @@ const ProductsPage: NextPageWithLayout = () => {
             price={product.price}
             image={product.imageUrl ?? ""}
             category={product.category.name}
-            onEdit={() => handleClickEditProduct(product.id)}
+            onEdit={() =>
+              handleClickEditProduct({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                categoryId: product.category.id,
+                imageUrl: product.imageUrl ?? "",
+              })
+            }
             onDelete={() => handleClickDeleteProduct(product.id)}
           />
         ))}

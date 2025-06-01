@@ -20,6 +20,7 @@ import {
 import { PaymentQRCode } from "./PaymentQrCode";
 import { useCartStore } from "@/store/cart";
 import { api } from "@/utils/api";
+import { toast } from "sonner";
 
 type OrderItemProps = {
   id: string;
@@ -110,7 +111,7 @@ export const CreateOrderSheet = ({
     data: createdOrder,
   } = api.order.createOrder.useMutation({
     onSuccess: () => {
-      alert("Order created");
+      toast("Order created");
 
       setPaymentDialogOpen(true);
     },
@@ -135,7 +136,7 @@ export const CreateOrderSheet = ({
 
   const { mutate: simulatePayment } = api.order.simulatePayment.useMutation({
     onSuccess: () => {
-      alert("Payment simulated successfully");
+      toast("Payment simulated successfully");
     },
   });
 

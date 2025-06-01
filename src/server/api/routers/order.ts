@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { createQRIS, xenditPaymentMethodClient } from "@/server/xendit";
 import { TRPCError } from "@trpc/server";
+import { OrderStatus, Prisma } from "@prisma/client";
 
 export const orderRouter = createTRPCRouter({
   createOrder: protectedProcedure
@@ -88,6 +89,46 @@ export const orderRouter = createTRPCRouter({
       };
     }),
 
+  getOrders: protectedProcedure
+    .input(
+      z.object({
+        status: z.enum(["ALL", ...Object.keys(OrderStatus)]),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+
+      const whereClause: Prisma.OrderWhereInput = {};
+
+      switch (input.status) {
+        case OrderStatus.AWAITING_PAYMENT:
+          whereClause.status = OrderStatus.AWAITING_PAYMENT;
+          break;
+        case OrderStatus.PROCESSING:
+          whereClause.status = OrderStatus.PROCESSING;
+          break;
+        case OrderStatus.DONE:
+          whereClause.status = OrderStatus.DONE;
+          break;
+      }
+
+      const orders = await db.order.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          grandTotal: true,
+          status: true,
+          _count: {
+            select: {
+              orderItems: true,
+            },
+          },
+        },
+      });
+
+      return orders;
+    }),
+
   simulatePayment: protectedProcedure
     .input(
       z.object({
@@ -148,4 +189,110 @@ export const orderRouter = createTRPCRouter({
 
       return true;
     }),
+
+  finishOrder: protectedProcedure
+    .input(
+      z.object({
+        orderId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx;
+
+      const order = await db.order.findUnique({
+        where: {
+          id: input.orderId,
+        },
+        select: {
+          paidAt: true,
+          status: true,
+          id: true,
+        },
+      });
+
+      if (!order) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Order not found",
+        });
+      }
+
+      if (!order?.paidAt) {
+        throw new TRPCError({
+          code: "UNPROCESSABLE_CONTENT",
+          message: "Order has not been paid yet",
+        });
+      }
+
+      if (order.status !== OrderStatus.PROCESSING) {
+        throw new TRPCError({
+          code: "UNPROCESSABLE_CONTENT",
+          message: "Order is not in processing status",
+        });
+      }
+
+      return await db.order.update({
+        where: {
+          id: input.orderId,
+        },
+        data: {
+          status: OrderStatus.DONE,
+        },
+      });
+    }),
+
+  getSalesReport: protectedProcedure.query(async ({ ctx, input }) => {
+    const { db } = ctx;
+
+    const paidOrdersQuery = db.order.findMany({
+      where: {
+        paidAt: {
+          not: null,
+        },
+      },
+      select: {
+        grandTotal: true,
+      },
+    });
+
+    const ongoingOrdersQuery = db.order.findMany({
+      where: {
+        status: {
+          not: OrderStatus.DONE,
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const completedOrdersQuery = db.order.findMany({
+      where: {
+        status: OrderStatus.DONE,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const [paidOrders, ongoingOrders, completedOrders] = await Promise.all([
+      paidOrdersQuery,
+      ongoingOrdersQuery,
+      completedOrdersQuery,
+    ]);
+
+    const totalRevenue = paidOrders.reduce((a, b) => {
+      return a + b.grandTotal;
+    }, 0);
+
+    const totalOngoingOrders = ongoingOrders.length;
+
+    const totalCompletedOrders = completedOrders.length;
+
+    return {
+      totalRevenue,
+      totalOngoingOrders,
+      totalCompletedOrders,
+    };
+  }),
 });

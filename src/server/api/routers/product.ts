@@ -3,12 +3,64 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { supabaseAdmin } from "@/server/supabase-admin";
 import { Bucket } from "@/server/bucket";
 import { TRPCError } from "@trpc/server";
+import type { Prisma } from "@prisma/client";
 
 export const ProductRouter = createTRPCRouter({
-  getProducts: protectedProcedure.query(async ({ ctx }) => {
+  getProducts: protectedProcedure
+    .input(
+      z.object({
+        categoryId: z.string(),
+        search: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { db } = ctx;
+
+      const whereClause: Prisma.ProductWhereInput = {};
+
+      if (input.categoryId !== "ALL") {
+        whereClause.categoryId = input.categoryId;
+      }
+
+      if (input.search) {
+        whereClause.OR = [
+          { name: { contains: input.search, mode: "insensitive" } },
+          {
+            category: { name: { contains: input.search, mode: "insensitive" } },
+          },
+        ];
+      }
+
+      const product = await db.product.findMany({
+        where: whereClause,
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          category: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          imageUrl: true,
+        },
+      });
+
+      return product;
+    }),
+
+  getProductById: protectedProcedure.input(
+    z.object(({
+      productId: z.string().uuid(),
+    }))
+  ).query(async ({ctx, input}) => {
     const { db } = ctx;
 
-    const product = await db.product.findMany({
+    const product = await db.product.findUnique({
+      where: {
+        id: input.productId,
+      },
       select: {
         id: true,
         name: true,
@@ -22,6 +74,13 @@ export const ProductRouter = createTRPCRouter({
         imageUrl: true,
       },
     });
+
+    if (!product) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Product not found",
+      });
+    }
 
     return product;
   }),

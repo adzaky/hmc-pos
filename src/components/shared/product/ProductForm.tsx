@@ -18,8 +18,11 @@ import type { ProductFormSchema } from "@/forms/product";
 import { uploadFileToSignedUrl } from "@/lib/supabase";
 import { Bucket } from "@/server/bucket";
 import { api } from "@/utils/api";
+import Image from "next/image";
+import Link from "next/link";
 import type { ChangeEvent } from "react";
 import { useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 
 type ProductFormProps = {
   onSubmit: (values: ProductFormSchema) => void;
@@ -36,7 +39,7 @@ export const ProductForm = ({
   const { mutateAsync: createImageSignedUrl, isPending: isUploadImagePending } =
     api.product.createProductImageUploadSignedUrl.useMutation();
 
-  const imageChangeHandler = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeImage = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files?.length > 0) {
       const file = files[0];
@@ -48,8 +51,9 @@ export const ProductForm = ({
         path,
         token,
       });
+      form.setValue("imageUrl", imageUrl);
       onChangeImageUrl(imageUrl);
-      alert("Product image uploaded!");
+      toast("Product image uploaded!");
     }
   };
 
@@ -117,14 +121,38 @@ export const ProductForm = ({
         )}
       />
 
-      <div className="space-y-2">
-        <Label>Product Image</Label>
-        <Input
-          type="file"
-          accept="image/*"
-          onChange={imageChangeHandler}
-          disabled={isUploadImagePending}
-        />
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Product Image</Label>
+          <Input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleChangeImage}
+            disabled={isUploadImagePending}
+          />
+        </div>
+
+        {form.getValues("imageUrl") && (
+          <div className="flex items-center">
+            <Image
+              src={form.getValues("imageUrl")}
+              width={100}
+              height={100}
+              loading="lazy"
+              alt={form.getValues("name")}
+              className="rounded-md"
+            />
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              href={form.getValues("imageUrl")}
+              className="text-muted-foreground ml-2 text-sm hover:underline"
+            >
+              {form.getValues("imageUrl").split("/").pop() || "No image"}
+            </Link>
+          </div>
+        )}
       </div>
     </form>
   );

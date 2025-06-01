@@ -25,15 +25,20 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { NextPageWithLayout } from "../_app";
 import { api } from "@/utils/api";
+import { toast } from "sonner";
+import type { Category } from "@prisma/client";
 
 const CategoriesPage: NextPageWithLayout = () => {
-  const apiUtils = api.useContext();
+  const apiUtils = api.useUtils();
 
   const [createCategoryDialogOpen, setCreateCategoryDialogOpen] =
     useState(false);
   const [editCategoryDialogOpen, setEditCategoryDialogOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
-  const [categoryToEdit, setCategoryToEdit] = useState<string | null>(null);
+  const [categoryToEdit, setCategoryToEdit] = useState<Omit<
+    Category,
+    "createdAt" | "updatedAt"
+  > | null>(null);
 
   // Forms =====================================================================
   const createCategoryForm = useForm<CategoryFormSchema>({
@@ -42,6 +47,9 @@ const CategoriesPage: NextPageWithLayout = () => {
 
   const editCategoryForm = useForm<CategoryFormSchema>({
     resolver: zodResolver(categoryFormSchema),
+    values: {
+      name: categoryToEdit?.name ?? "",
+    },
   });
 
   // Queries ===================================================================
@@ -52,7 +60,7 @@ const CategoriesPage: NextPageWithLayout = () => {
       onSuccess: async () => {
         await apiUtils.category.getCategories.invalidate();
 
-        alert("Category created successfully!");
+        toast("Category created successfully!");
         setCreateCategoryDialogOpen(false);
         createCategoryForm.reset();
       },
@@ -63,7 +71,7 @@ const CategoriesPage: NextPageWithLayout = () => {
       onSuccess: async () => {
         await apiUtils.category.getCategories.invalidate();
 
-        alert("Category deleted successfully!");
+        toast("Category deleted successfully!");
         setCategoryToDelete(null);
       },
     });
@@ -73,7 +81,7 @@ const CategoriesPage: NextPageWithLayout = () => {
       onSuccess: async () => {
         await apiUtils.category.getCategories.invalidate();
 
-        alert("Category edited successfully!");
+        toast("Category edited successfully!");
         setEditCategoryDialogOpen(false);
         editCategoryForm.reset();
       },
@@ -90,14 +98,16 @@ const CategoriesPage: NextPageWithLayout = () => {
     if (!categoryToEdit) return;
 
     editCategory({
-      categoryId: categoryToEdit,
+      categoryId: categoryToEdit.id,
       name: data.name,
     });
   };
 
-  const handleClickEditCategory = (categoryId: string) => {
+  const handleClickEditCategory = (
+    category: Omit<Category, "createdAt" | "updatedAt">,
+  ) => {
     setEditCategoryDialogOpen(true);
-    setCategoryToEdit(categoryId);
+    setCategoryToEdit(category);
   };
 
   const handleClickDeleteCategory = (categoryId: string) => {
@@ -160,8 +170,8 @@ const CategoriesPage: NextPageWithLayout = () => {
             <CategoryCatalogCard
               key={category.id}
               name={category.name}
-              productCount={category.productCount}
-              onEdit={() => handleClickEditCategory(category.id)}
+              productCount={category._count.products}
+              onEdit={() => handleClickEditCategory(category)}
               onDelete={() => handleClickDeleteCategory(category.id)}
             />
           );

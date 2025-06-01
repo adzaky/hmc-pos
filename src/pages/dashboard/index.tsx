@@ -15,16 +15,29 @@ import type { NextPageWithLayout } from "../_app";
 import { Button } from "@/components/ui/button";
 import { api } from "@/utils/api";
 import { useCartStore } from "@/store/cart";
+import { toast } from "sonner";
+import { useDebounce } from "@/hooks/use-debounce";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 const DashboardPage: NextPageWithLayout = () => {
   const cartStore = useCartStore();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [orderSheetOpen, setOrderSheetOpen] = useState(false);
 
-  const { data: categories } = api.category.getCategories.useQuery();
-  const { data: products } = api.product.getProducts.useQuery();
+  const debouncedSearchQuery = useDebounce<string>(searchQuery, 300);
+
+  const { data: categories, isPending: isPendingCategories } =
+    api.category.getCategories.useQuery();
+
+  const { data: products, isPending: isPendingProducts } =
+    api.product.getProducts.useQuery({
+      categoryId: selectedCategory,
+      search: debouncedSearchQuery,
+    });
+
+  const totalProducts = products?.length ?? 0;
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -34,7 +47,7 @@ const DashboardPage: NextPageWithLayout = () => {
     const productToAdd = products?.find((product) => product.id === productId);
 
     if (!productToAdd) {
-      alert("Product not found");
+      toast("Product not found");
       return;
     }
 
@@ -80,11 +93,18 @@ const DashboardPage: NextPageWithLayout = () => {
         </div>
 
         <div className="flex space-x-4 overflow-x-auto pb-2">
+          <CategoryFilterCard
+            name={searchQuery ? "Searched Products" : "All Categories"}
+            productCount={totalProducts}
+            isSelected={selectedCategory === "ALL"}
+            onClick={() => handleCategoryClick("ALL")}
+          />
+          {isPendingCategories && <LoadingSpinner />}
           {categories?.map((category) => (
             <CategoryFilterCard
               key={category.id}
               name={category.name}
-              productCount={category.productCount}
+              productCount={category._count.products}
               isSelected={selectedCategory === category.id}
               onClick={() => handleCategoryClick(category.id)}
             />
@@ -100,6 +120,11 @@ const DashboardPage: NextPageWithLayout = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {isPendingProducts && (
+                <div className="col-span-4 flex h-96 items-center justify-center">
+                  <LoadingSpinner size={32} />
+                </div>
+              )}
               {products?.map((product) => (
                 <ProductMenuCard
                   key={product.id}
