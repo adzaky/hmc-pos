@@ -126,7 +126,7 @@ const AppSidebar = ({ children }: AppSidebarProps) => {
             orientation="vertical"
             className="mr-2 data-[orientation=vertical]:h-4"
           />
-          <h3 className="font-bold lg:text-lg">Hammercode POS</h3>
+          <h3 className="text-sm font-bold lg:text-lg">Hammercode POS</h3>
           <div className="ml-auto">
             <UserButton showName={!isMobile} />
           </div>
