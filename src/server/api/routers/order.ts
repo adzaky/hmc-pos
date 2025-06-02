@@ -20,6 +20,13 @@ export const orderRouter = createTRPCRouter({
       const { db } = ctx;
       const { orderItems } = input;
 
+      if (!orderItems.length) {
+        throw new TRPCError({
+          code: "UNPROCESSABLE_CONTENT",
+          message: "Order must have at least one item",
+        });
+      }
+
       const products = await db.product.findMany({
         where: {
           id: {

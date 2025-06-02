@@ -125,6 +125,11 @@ export const CreateOrderSheet = ({
   };
 
   const handleCreateOrder = () => {
+    if (!cartStore.items.length) {
+      toast("Cart is empty. Please add items to the cart.");
+      return;
+    }
+
     createOrder({
       orderItems: cartStore.items.map((item) => ({
         productId: item.productId,
