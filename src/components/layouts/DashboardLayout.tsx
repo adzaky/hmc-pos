@@ -1,7 +1,7 @@
 import { BarChart3, Grid3X3, Package, ShoppingCart } from "lucide-react";
 import React, { type ReactNode } from "react";
 
-import { SignOutButton } from "@clerk/nextjs";
+import { SignOutButton, UserButton } from "@clerk/nextjs";
 import {
   Sidebar,
   SidebarContent,
@@ -22,8 +22,12 @@ import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 
 // App sidebar component
-const AppSidebar = () => {
-  const { toggleSidebar } = useSidebar();
+interface AppSidebarProps {
+  children: ReactNode;
+}
+
+const AppSidebar = ({ children }: AppSidebarProps) => {
+  const { toggleSidebar, isMobile } = useSidebar();
 
   const [isPendingSignOut, setIsPendingSignOut] =
     React.useState<boolean>(false);
@@ -31,86 +35,105 @@ const AppSidebar = () => {
   const router = useRouter();
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4">
-        <h2 className="text-xl font-bold">Hammercode POS</h2>
-      </SidebarHeader>
-      <SidebarContent className="px-4">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Create Order"
-              isActive={router.pathname.includes("/dashboard")}
-              onClick={toggleSidebar}
-            >
-              <Link href="/dashboard">
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Create Order
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <SidebarSeparator className="my-2" />
+    <div className="flex h-screen w-full">
+      <Sidebar>
+        <SidebarHeader className="p-4">
+          <h2 className="text-xl font-bold">Hammercode POS</h2>
+        </SidebarHeader>
 
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Category Management"
-              isActive={router.pathname.includes("/categories")}
-              onClick={toggleSidebar}
-            >
-              <Link href="/categories">
-                <Grid3X3 className="mr-2 h-4 w-4" />
-                Category Management
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+        <SidebarContent className="overflow-x-hidden px-4">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip="Create Order"
+                isActive={router.pathname.includes("/dashboard")}
+                onClick={toggleSidebar}
+              >
+                <Link href="/dashboard">
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                  Create Order
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Product Management"
-              isActive={router.pathname.includes("/products")}
-              onClick={toggleSidebar}
-            >
-              <Link href="/products">
-                <Package className="mr-2 h-4 w-4" />
-                Product Management
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <SidebarSeparator className="my-2" />
 
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Sales Dashboard"
-              isActive={router.pathname.includes("/sales")}
-              onClick={toggleSidebar}
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip="Category Management"
+                isActive={router.pathname.includes("/categories")}
+                onClick={toggleSidebar}
+              >
+                <Link href="/categories">
+                  <Grid3X3 className="mr-2 h-4 w-4" />
+                  Category Management
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip="Product Management"
+                isActive={router.pathname.includes("/products")}
+                onClick={toggleSidebar}
+              >
+                <Link href="/products">
+                  <Package className="mr-2 h-4 w-4" />
+                  Product Management
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip="Sales Dashboard"
+                isActive={router.pathname.includes("/sales")}
+                onClick={toggleSidebar}
+              >
+                <Link href="/sales">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Sales Dashboard
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarContent>
+
+        <SidebarFooter className="space-y-2 p-4">
+          <p className="text-muted-foreground text-xs">Hammercode POS v1.0</p>
+          <SignOutButton redirectUrl="/sign-in">
+            <Button
+              variant="destructive"
+              className="hover:opacity-80"
+              onClick={() => setIsPendingSignOut(true)}
+              loading={isPendingSignOut}
             >
-              <Link href="/sales">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Sales Dashboard
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarContent>
-      <SidebarFooter className="p-4">
-        <p className="text-muted-foreground text-xs">Hammercode POS v1.0</p>
-        <SignOutButton redirectUrl="/sign-in">
-          <Button
-            variant="destructive"
-            className="hover:opacity-80"
-            onClick={() => setIsPendingSignOut(true)}
-            loading={isPendingSignOut}
-          >
-            Sign Out
-          </Button>
-        </SignOutButton>
-      </SidebarFooter>
-    </Sidebar>
+              Sign Out
+            </Button>
+          </SignOutButton>
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator
+            orientation="vertical"
+            className="mr-2 data-[orientation=vertical]:h-4"
+          />
+          <h3 className="font-bold lg:text-lg">Hammercode POS</h3>
+          <div className="ml-auto">
+            <UserButton showName={!isMobile} />
+          </div>
+        </header>
+        <main className="relative flex-1 overflow-auto p-6">{children}</main>
+      </SidebarInset>
+    </div>
   );
 };
 
@@ -165,20 +188,7 @@ interface DashboardLayoutProps {
 export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen w-full">
-        <AppSidebar />
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <h3 className="text-lg font-bold">Hammercode POS</h3>
-          </header>
-          <main className="relative flex-1 overflow-auto p-6">{children}</main>
-        </SidebarInset>
-      </div>
+      <AppSidebar>{children}</AppSidebar>
     </SidebarProvider>
   );
 };
