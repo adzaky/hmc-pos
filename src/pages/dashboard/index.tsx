@@ -18,6 +18,7 @@ import { useCartStore } from "@/store/cart";
 import { toast } from "sonner";
 import { useDebounce } from "@/hooks/use-debounce";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import BadgeNumber from "@/components/ui/badge-number";
 
 const DashboardPage: NextPageWithLayout = () => {
   const cartStore = useCartStore();
@@ -64,7 +65,7 @@ const DashboardPage: NextPageWithLayout = () => {
       <DashboardHeader>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <DashboardTitle>Dashboard {cartStore.items.length}</DashboardTitle>
+            <DashboardTitle>Dashboard</DashboardTitle>
             <DashboardDescription>
               Welcome to your Hammercode POS system dashboard.
             </DashboardDescription>
@@ -75,7 +76,8 @@ const DashboardPage: NextPageWithLayout = () => {
               className="animate-in slide-in-from-right"
               onClick={() => setOrderSheetOpen(true)}
             >
-              <ShoppingCart /> Cart
+              <ShoppingCart /> Cart{" "}
+              <BadgeNumber number={cartStore.items.length} />
             </Button>
           )}
         </div>
