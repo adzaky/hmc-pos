@@ -121,6 +121,7 @@ export const CreateOrderSheet = ({
       cartStore.updateQuantity(id, quantity);
     } else {
       cartStore.removeFromCart(id);
+      onOpenChange(false);
     }
   };
 
