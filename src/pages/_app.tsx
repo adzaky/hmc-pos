@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import "@/styles/globals.css";
 import { api } from "@/utils/api";
 import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 import type { NextPage } from "next";
 import { type AppProps } from "next/app";
 import { Outfit } from "next/font/google";
@@ -24,7 +25,11 @@ const MyApp = ({ Component, pageProps }: AppPropsWithLayout) => {
   const getLayout = Component.getLayout ?? ((page) => page);
 
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        baseTheme: dark,
+      }}
+    >
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <div className={`${outfit.className}`}>
           {getLayout(<Component {...pageProps} />)}
