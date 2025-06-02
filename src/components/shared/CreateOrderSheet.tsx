@@ -139,16 +139,17 @@ export const CreateOrderSheet = ({
     });
   };
 
-  const { mutate: simulatePayment } = api.order.simulatePayment.useMutation({
-    onSuccess: () => {
-      toast("Payment simulated successfully");
-    },
-  });
+  const { mutate: simulatePayment, isPending: isPendingSimulatePayment } =
+    api.order.simulatePayment.useMutation({
+      onSuccess: () => {
+        toast("Payment simulated successfully");
+      },
+    });
 
   const {
     mutate: checkOrderStatus,
     data: orderPaid,
-    isPending: isPendingOrderStatus,
+    isPending: isPendingCheckOrderStatus,
     reset: resetCheckOrderStatus,
   } = api.order.checkOrderStatus.useMutation({
     onSuccess: (orderPaid) => {
@@ -158,6 +159,8 @@ export const CreateOrderSheet = ({
       }
     },
   });
+
+  const isPendingCheckStatus = isPendingCheckOrderStatus || orderPaid;
 
   const handleRefresh = () => {
     if (!createdOrder) return;
@@ -245,17 +248,17 @@ export const CreateOrderSheet = ({
           <div className="flex flex-col items-center justify-center gap-4">
             <p className="text-lg font-medium">Finish Payment</p>
 
-            {!orderPaid && (
+            {!isPendingCheckStatus && (
               <Button
                 variant="link"
                 onClick={handleRefresh}
-                loading={isPendingOrderStatus}
+                loading={isPendingCheckOrderStatus}
               >
-                {isPendingOrderStatus ? "Refreshing..." : "Refresh"}
+                {isPendingCheckOrderStatus ? "Refreshing..." : "Refresh"}
               </Button>
             )}
 
-            {!orderPaid ? (
+            {!isPendingCheckStatus ? (
               <PaymentQRCode qrString={createdOrder?.qrString ?? ""} />
             ) : (
               <CheckCircle2 className="size-80 text-green-500" />
@@ -269,9 +272,15 @@ export const CreateOrderSheet = ({
               Transaction ID: {createdOrder?.order?.id}
             </p>
 
-            {!orderPaid && (
-              <Button variant="link" onClick={handleSimulatePayment}>
-                Simulate Payment
+            {!isPendingCheckStatus && (
+              <Button
+                variant="link"
+                onClick={handleSimulatePayment}
+                disabled={isPendingSimulatePayment}
+              >
+                {isPendingSimulatePayment
+                  ? "Simulating..."
+                  : "Simulate Payment"}
               </Button>
             )}
           </div>
@@ -281,7 +290,7 @@ export const CreateOrderSheet = ({
               variant="outline"
               className="w-full"
               onClick={handleClosePaymentDialog}
-              loading={isPendingOrderStatus}
+              loading={isPendingCheckOrderStatus}
             >
               Done
             </Button>
