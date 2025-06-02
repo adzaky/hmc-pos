@@ -123,7 +123,7 @@ const CategoriesPage: NextPageWithLayout = () => {
   return (
     <>
       <DashboardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="space-y-1">
             <DashboardTitle>Category Management</DashboardTitle>
             <DashboardDescription>
@@ -164,7 +164,7 @@ const CategoriesPage: NextPageWithLayout = () => {
         </div>
       </DashboardHeader>
 
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 lg:gap-4">
         {categories?.map((category) => {
           return (
             <CategoryCatalogCard
