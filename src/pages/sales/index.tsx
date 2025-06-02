@@ -18,6 +18,7 @@ import {
 import { OrderStatus } from "@prisma/client";
 import { toRupiah } from "@/utils/toRupiah";
 import { toast } from "sonner";
+import { toCapitalized } from "@/utils/toCapitalized";
 
 const SalesPage: NextPageWithLayout = () => {
   const apiUtils = api.useUtils();
@@ -54,7 +55,9 @@ const SalesPage: NextPageWithLayout = () => {
   return (
     <>
       <DashboardHeader>
-        <DashboardTitle>Sales Dashboard | {filterOrder}</DashboardTitle>
+        <DashboardTitle>
+          Sales Dashboard | {toCapitalized(filterOrder)} Orders
+        </DashboardTitle>
         <DashboardDescription>
           Track your sales performance and view analytics.
         </DashboardDescription>
@@ -92,11 +95,11 @@ const SalesPage: NextPageWithLayout = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent align="end">
-              <SelectItem value="ALL">ALL ORDERS</SelectItem>
+              <SelectItem value="ALL">All Orders</SelectItem>
               {Object.keys(OrderStatus).map((orderStatus) => {
                 return (
                   <SelectItem key={orderStatus} value={orderStatus}>
-                    {orderStatus.replace(/_/g, " ")}
+                    {toCapitalized(orderStatus)}
                   </SelectItem>
                 );
               })}
