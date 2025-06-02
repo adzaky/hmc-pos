@@ -10,6 +10,8 @@ export default function Home() {
   useEffect(() => {
     if (isSignedIn && isLoaded) {
       void router.replace("/dashboard");
+    } else {
+      void router.replace("/sign-in");
     }
   }, [isSignedIn, isLoaded]);
 
@@ -23,7 +25,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen w-screen items-center justify-center">
-      <SignIn path="/sign-in" />
+      <SignIn path="/sign-in" fallbackRedirectUrl="/dashboard" />
     </div>
   );
 }
